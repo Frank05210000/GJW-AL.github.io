@@ -1,0 +1,45 @@
+name: Update Hashtag Data (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      hashtag:
+        description: 'Hashtag (例如 #善念點亮台灣)'
+        required: true
+        default: '#善念點亮台灣'
+      lang:
+        description: '語系'
+        required: true
+        default: 'zh-TW'
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Fetch hashtag contents
+        run: |
+          python fetch_hashtag_contents.py \
+            --hashtag "${{ github.event.inputs.hashtag }}" \
+            --lang "${{ github.event.inputs.lang }}" \
+            --output data/latest.csv \
+            --json-output web/data/contents.json
+      - name: Commit changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/latest.csv web/data/contents.json
+          git commit -m "Update hashtag data" || echo 'No changes'
+      - name: Push changes
+        if: ${{ success() }}
+        uses: ad-m/github-push-action@v0.8.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref_name }}

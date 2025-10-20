@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GJW-聚合頁爬蟲抽獎</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__overlay"></div>
+    <div class="hero__content">
+      <h1>GJW-聚合頁爬蟲抽獎</h1>
+      <p>集中管理乾淨世界聚合頁，快速檢視貼文並可立即抽籤選出幸運分享。</p>
+      <div class="stats" id="stats"></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="controls" aria-label="篩選工具">
+      <div class="control">
+        <label for="search">關鍵字搜尋</label>
+        <input id="search" type="search" placeholder="輸入標題、頻道或標籤關鍵字…" autocomplete="off">
+      </div>
+      <div class="control">
+        <label for="typeFilter">內容類型</label>
+        <select id="typeFilter">
+          <option value="all">全部類型</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="langFilter">語系</label>
+        <select id="langFilter">
+          <option value="all">全部語系</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="channelFilter">頻道</label>
+        <select id="channelFilter">
+          <option value="all">全部頻道</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="sortSelect">排序方式</label>
+        <select id="sortSelect">
+          <option value="newest">最新優先</option>
+          <option value="oldest">最舊優先</option>
+          <option value="likes">按讚最多</option>
+          <option value="shares">分享最多</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="lottery" aria-label="抽籤工具">
+      <div class="lottery__header">
+        <h2>幸運抽籤</h2>
+        <p id="lotteryHint">從目前篩選結果中抽出隨機內容。</p>
+      </div>
+      <div class="lottery__controls">
+        <label for="lotteryCount">抽籤數量</label>
+        <div class="lottery__input-group">
+          <input id="lotteryCount" type="number" min="1" value="1" inputmode="numeric">
+          <button id="lotteryButton" type="button">開始抽籤</button>
+        </div>
+      </div>
+      <div class="lottery__results" id="lotteryResults" aria-live="polite"></div>
+    </section>
+
+    <section class="results" aria-live="polite">
+      <div class="results__summary" id="summary"></div>
+      <div class="card-grid" id="cardGrid"></div>
+      <div class="pagination" id="pagination" hidden>
+        <button id="prevPage" type="button">上一頁</button>
+        <span id="pageInfo"></span>
+        <button id="nextPage" type="button">下一頁</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>資料來源：乾淨世界（Gan Jing World）公開 API。數據最後更新於 <span id="lastUpdated">—</span></p>
+    <p>若要重新更新資料，請執行 <code>fetch_hashtag_contents.py</code> 產出最新的 <code>web/data/contents.json</code>。</p>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
