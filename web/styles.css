@@ -443,3 +443,10 @@ body {
 .card--lottery .card__body {
   gap: 0.4rem;
 }
+
+#projectLink {
+  color: var(--primary);
+}
+#projectLink:hover {
+  text-decoration: underline;
+}
