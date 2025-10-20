@@ -74,5 +74,9 @@ jobs:
 
       - name: Push changes
         if: ${{ success() }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          REF: ${{ github.ref_name }}
         run: |
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" HEAD:"${REF}"

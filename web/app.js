@@ -1,4 +1,4 @@
-const DATA_URL = 'data/contents.json';
+const DATA_URL = `data/contents.json?v=${Date.now()}`;
 const PAGE_SIZE = 48;
 
 const state = {
