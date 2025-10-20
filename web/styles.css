@@ -450,3 +450,12 @@ body {
 #projectLink:hover {
   text-decoration: underline;
 }
+
+.footer__note {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 14px;
+  background: rgba(255, 193, 7, 0.18);
+  color: #9c6b00;
+  font-weight: 600;
+}
