@@ -20,6 +20,8 @@ on:
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -57,7 +59,6 @@ jobs:
               --output "data/latest_${lang_trim}.csv" \
               --json-output "web/data/contents_${lang_trim}.json"
           done
-          # 若只有單一語系且檔名不是 contents.json，複製一份給前端 default 使用
           if [ ${#LANGS[@]} -eq 1 ]; then
             lang_trim=$(echo "${LANGS[0]}" | xargs)
             cp "web/data/contents_${lang_trim}.json" web/data/contents.json
@@ -73,7 +74,5 @@ jobs:
 
       - name: Push changes
         if: ${{ success() }}
-        uses: ad-m/github-push-action@v0.8.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref_name }}
+        run: |
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
