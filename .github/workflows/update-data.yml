@@ -8,9 +8,14 @@ on:
         required: true
         default: '#善念點亮台灣'
       lang:
-        description: '語系'
-        required: true
-        default: 'zh-TW'
+        description: '語系，可輸入逗號分隔多個語系或留空使用預設 zh-TW。'
+        required: false
+        default: ''
+      skip_fetch:
+        description: '勾選後僅測試 workflow，不實際抓取資料。'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   fetch:
@@ -19,24 +24,53 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+
+      - name: Stop early when skip_fetch=true
+        if: ${{ github.event.inputs.skip_fetch == 'true' }}
+        run: |
+          echo "skip_fetch 為 true，停止抓取資料。"
+          exit 0
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - name: Install dependencies
         run: pip install -r requirements.txt
+
       - name: Fetch hashtag contents
         run: |
-          python fetch_hashtag_contents.py \
-            --hashtag "${{ github.event.inputs.hashtag }}" \
-            --lang "${{ github.event.inputs.lang }}" \
-            --output data/latest.csv \
-            --json-output web/data/contents.json
+          set -e
+          LANG_INPUT="${{ github.event.inputs.lang }}"
+          if [ -z "$LANG_INPUT" ]; then
+            LANG_INPUT='zh-TW'
+          fi
+          IFS=',' read -ra LANGS <<< "$LANG_INPUT"
+          mkdir -p data web/data
+          for lang in "${LANGS[@]}"; do
+            lang_trim=$(echo "$lang" | xargs)
+            [ -z "$lang_trim" ] && continue
+            echo "Fetching hashtag ${{ github.event.inputs.hashtag }} for lang=$lang_trim"
+            python fetch_hashtag_contents.py \
+              --hashtag "${{ github.event.inputs.hashtag }}" \
+              --lang "$lang_trim" \
+              --output "data/latest_${lang_trim}.csv" \
+              --json-output "web/data/contents_${lang_trim}.json"
+          done
+          # 若只有單一語系且檔名不是 contents.json，複製一份給前端 default 使用
+          if [ ${#LANGS[@]} -eq 1 ]; then
+            lang_trim=$(echo "${LANGS[0]}" | xargs)
+            cp "web/data/contents_${lang_trim}.json" web/data/contents.json
+            cp "data/latest_${lang_trim}.csv" data/latest.csv
+          fi
+
       - name: Commit changes
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data/latest.csv web/data/contents.json
+          git add data/ web/data/
           git commit -m "Update hashtag data" || echo 'No changes'
+
       - name: Push changes
         if: ${{ success() }}
         uses: ad-m/github-push-action@v0.8.0

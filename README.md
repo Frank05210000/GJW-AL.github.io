@@ -60,5 +60,12 @@ python -m http.server 3000
 
 ## 後續規劃
 
-- 在 `.github/workflows/` 建立 GitHub Actions，自動抓取資料並 commit。
+- 在 `.github/workflows/` 建立 GitHub Actions，自動抓取資料並 commit（workflow 支援多語系輸入、手動跳過抓取）。
 - 啟用 GitHub Pages 指向 `web/` 目錄，即可在 GitHub.io 上分享成果。
+
+## GitHub Actions 使用方式
+1. 推送後到 GitHub **Actions** 頁籤，選擇 `Update Hashtag Data (manual)`。
+2. `hashtag`：輸入要抓的聚合頁名稱（含 #）。
+3. `lang`：可留空（預設 zh-TW），或輸入逗號分隔的語系，例如 `zh-TW,en-US`。
+4. `skip_fetch`：只想測試流程可勾選，流程將不抓資料。
+5. 送出後 workflow 會在 `data/` 與 `web/data/` 產生對應檔案，單一語系會同步覆蓋 `latest.csv` 與 `contents.json`。
