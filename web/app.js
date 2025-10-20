@@ -377,28 +377,18 @@ function renderLotteryResults(items) {
   }
   state.lotterySelection = items.map((item) => item.id);
   items.forEach((item, index) => {
-    const card = document.createElement('div');
-    card.className = 'lottery-card';
-
-    const title = document.createElement('h3');
+    const card = createCard(item);
+    card.classList.add('card--lottery');
+    const orderChip = document.createElement('span');
+    orderChip.className = 'lottery-order';
     const order = String(index + 1).padStart(2, '0');
-    title.textContent = `${order}. ${item.title || '(無標題)'}`;
-
-    const meta = document.createElement('div');
-    meta.className = 'lottery-card__meta';
-    meta.innerHTML = `
-      <span>📺 ${item.channel_name || '未知頻道'}</span>
-      <span>🕒 ${formatDate(item.createdAtMs)}</span>
-      <span>👍 ${item.like_count?.toLocaleString?.() || 0}</span>
-    `;
-
-    const link = document.createElement('a');
-    link.href = item.post_url || '#';
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.textContent = '前往貼文';
-
-    card.append(title, meta, link);
+    orderChip.textContent = `第 ${order} 抽`;
+    const body = card.querySelector('.card__body');
+    if (body) {
+      body.insertBefore(orderChip, body.firstChild);
+    } else {
+      card.append(orderChip);
+    }
     container.append(card);
   });
 }
