@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Download Gan Jing World hashtag contents and export to CSV/JSON for presentation."""
 from __future__ import annotations
 
@@ -153,10 +152,16 @@ def write_csv(rows: List[Dict[str, object]], output_path: Path, fieldnames: List
             writer.writerow(row)
 
 
-def write_json(rows: List[Dict[str, object]], output_path: Path) -> None:
+def write_json(rows: List[Dict[str, object]], output_path: Path, generated_at: datetime) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "generated_at_iso": generated_at.isoformat().replace("+00:00", "Z"),
+        "generated_at_epoch": int(generated_at.timestamp()),
+        "item_count": len(rows),
+        "items": rows,
+    }
     with output_path.open("w", encoding="utf-8") as f:
-        json.dump(rows, f, ensure_ascii=False, indent=2)
+        json.dump(payload, f, ensure_ascii=False, indent=2)
 
 
 def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
@@ -175,17 +180,17 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
         "--hide-by-owner",
         dest="hide_by_owner",
         action="store_true",
-        default=True,
-        help="排除被頻道隱藏的內容（預設開啟）",
+        default=False,
+        help="排除被頻道隱藏的內容（預設關閉）",
     )
     parser.add_argument(
         "--no-hide-by-owner",
         dest="hide_by_owner",
         action="store_false",
-        help="包含被頻道隱藏的內容",
+        help="包含被頻道隱藏的內容（與 --hide-by-owner 相同，預設即為顯示全部）",
     )
-    parser.add_argument("--output", default="hashtag_contents.csv", help="CSV 檔案路徑（留空可略過）")
-    parser.add_argument("--json-output", default="", help="JSON 檔案路徑（選填）")
+    parser.add_argument("--output", default="data/latest.csv", help="CSV 檔案路徑（預設 data/latest.csv，可留空略過）")
+    parser.add_argument("--json-output", default="web/data/contents.json", help="JSON 檔案路徑（預設 web/data/contents.json，可留空略過）")
     parser.add_argument("--fields", nargs="*", default=DEFAULT_FIELDS, help="CSV 欄位順序")
     parser.add_argument("--encoding", default="utf-8-sig", help="CSV 編碼，預設為 utf-8-sig 以利 Excel 顯示")
     return parser.parse_args(argv)
@@ -203,17 +208,18 @@ def main(argv: Optional[List[str]] = None) -> int:
         hide_by_owner=args.hide_by_owner,
     )
     rows = [normalise_item(item) for item in rows_raw]
+    generated_at = datetime.now(timezone.utc)
 
     outputs: List[str] = []
     if args.output:
         write_csv(rows, Path(args.output), args.fields, args.encoding)
         outputs.append(f"CSV→{args.output} ({args.encoding})")
     if args.json_output:
-        write_json(rows, Path(args.json_output))
+        write_json(rows, Path(args.json_output), generated_at)
         outputs.append(f"JSON→{args.json_output}")
 
     summary = ", ".join(outputs) if outputs else "未產出檔案"
-    print(f"Fetched {len(rows)} items. {summary}")
+    print(f"Fetched {len(rows)} items at {generated_at.isoformat().replace('+00:00', 'Z')}. {summary}")
     return 0
 
 

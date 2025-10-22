@@ -6,6 +6,7 @@ const state = {
   filteredItems: [],
   currentPage: 1,
   lastUpdated: null,
+  generatedAtMs: null,
   lotterySelection: [],
 };
 
@@ -22,6 +23,8 @@ const elements = {
   langFilter: document.getElementById('langFilter'),
   channelFilter: document.getElementById('channelFilter'),
   sortSelect: document.getElementById('sortSelect'),
+  dateStart: document.getElementById('dateStart'),
+  dateEnd: document.getElementById('dateEnd'),
   lastUpdated: document.getElementById('lastUpdated'),
   lotteryHint: document.getElementById('lotteryHint'),
   lotteryCount: document.getElementById('lotteryCount'),
@@ -37,16 +40,30 @@ async function init() {
     if (!response.ok) {
       throw new Error(`讀取資料失敗：${response.status}`);
     }
-    const rawItems = await response.json();
-    state.allItems = rawItems.map((item) => ({
+    const payload = await response.json();
+    let items = payload;
+    let generatedAtMs = null;
+    if (payload && !Array.isArray(payload) && Array.isArray(payload.items)) {
+      items = payload.items;
+      if (payload.generated_at_epoch) {
+        generatedAtMs = payload.generated_at_epoch * 1000;
+      } else if (payload.generated_at_iso) {
+        const parsed = Date.parse(payload.generated_at_iso);
+        if (!Number.isNaN(parsed)) generatedAtMs = parsed;
+      }
+    }
+
+    state.allItems = items.map((item) => ({
       ...item,
       createdAtMs: item.created_at_iso ? Date.parse(item.created_at_iso) : 0,
       hashtagsArray: item.hashtags ? item.hashtags.split(';').filter(Boolean) : [],
     }));
+    state.generatedAtMs = generatedAtMs;
+    state.lastUpdated = generatedAtMs ? new Date(generatedAtMs) : new Date();
 
-    state.lastUpdated = new Date();
     populateFilters(state.allItems);
     updateStats(state.allItems);
+    updateDateInputs(state.allItems);
     setLotteryPlaceholder();
     applyFilters();
     wireEvents();
@@ -75,6 +92,18 @@ function wireEvents() {
     state.currentPage = 1;
     applyFilters();
   });
+  if (elements.dateStart) {
+    elements.dateStart.addEventListener('change', () => {
+      state.currentPage = 1;
+      applyFilters();
+    });
+  }
+  if (elements.dateEnd) {
+    elements.dateEnd.addEventListener('change', () => {
+      state.currentPage = 1;
+      applyFilters();
+    });
+  }
   elements.sortSelect.addEventListener('change', () => {
     state.currentPage = 1;
     applyFilters();
@@ -144,11 +173,17 @@ function applyFilters() {
   const typeValue = elements.typeFilter.value;
   const langValue = elements.langFilter.value;
   const channelValue = elements.channelFilter.value;
+  const startValue = elements.dateStart ? elements.dateStart.value : '';
+  const endValue = elements.dateEnd ? elements.dateEnd.value : '';
+  const startMs = startValue ? new Date(`${startValue}T00:00:00`).getTime() : null;
+  const endMs = endValue ? new Date(`${endValue}T23:59:59.999`).getTime() : null;
 
   const filtered = state.allItems.filter((item) => {
     if (typeValue !== 'all' && item.type !== typeValue) return false;
     if (langValue !== 'all' && item.lang !== langValue) return false;
     if (channelValue !== 'all' && item.channel_name !== channelValue) return false;
+    if (startMs && item.createdAtMs && item.createdAtMs < startMs) return false;
+    if (endMs && item.createdAtMs && item.createdAtMs > endMs) return false;
 
     if (searchTerm) {
       const haystack = [
@@ -422,6 +457,35 @@ function renderFooter() {
   elements.lastUpdated.textContent = formatter.format(state.lastUpdated);
 
   updateStats(state.allItems);
+}
+
+function updateDateInputs(items) {
+  if (!elements.dateStart || !elements.dateEnd || !items.length) return;
+  const times = items
+    .map((item) => item.createdAtMs)
+    .filter((value) => typeof value === 'number' && !Number.isNaN(value));
+  if (!times.length) return;
+  const min = new Date(Math.min(...times));
+  const max = new Date(Math.max(...times));
+  const formatInputDate = (date) => date.toISOString().slice(0, 10);
+  const minStr = formatInputDate(min);
+  const maxStr = formatInputDate(max);
+  elements.dateStart.min = minStr;
+  elements.dateStart.max = maxStr;
+  elements.dateEnd.min = minStr;
+  elements.dateEnd.max = maxStr;
+  if (!elements.dateStart.value) {
+    elements.dateStart.value = minStr;
+  } else {
+    if (elements.dateStart.value < minStr) elements.dateStart.value = minStr;
+    if (elements.dateStart.value > maxStr) elements.dateStart.value = maxStr;
+  }
+  if (!elements.dateEnd.value) {
+    elements.dateEnd.value = maxStr;
+  } else {
+    if (elements.dateEnd.value > maxStr) elements.dateEnd.value = maxStr;
+    if (elements.dateEnd.value < minStr) elements.dateEnd.value = minStr;
+  }
 }
 
 function updateStats(items) {

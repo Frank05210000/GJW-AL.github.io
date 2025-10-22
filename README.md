@@ -47,7 +47,7 @@ python fetch_hashtag_contents.py \
   --json-output web/data/contents.json
 ```
 
-如需調整語系、類型或頁數，請參考腳本內的其他參數。
+如需調整語系、類型或頁數，請參考腳本內的其他參數。預設輸出會寫入 `data/latest.csv` 與 `web/data/contents.json`，也可以改用 `--output` / `--json-output` 指定其他路徑。若要排除被頻道隱藏的貼文，可額外加上 `--hide-by-owner`。
 
 ## 本機預覽網站
 
@@ -73,3 +73,15 @@ python -m http.server 3000
 3. `lang`：可留空（預設 zh-TW），或輸入逗號分隔的語系，例如 `zh-TW,en-US`。
 4. `skip_fetch`：只想測試流程可勾選，流程將不抓資料。
 5. 送出後 workflow 會在 `data/` 與 `web/data/` 產生對應檔案，單一語系會同步覆蓋 `latest.csv` 與 `contents.json`。
+
+### JSON 結構
+`web/data/contents.json` 帶有額外的時間戳記：
+```json
+{
+  "generated_at_iso": "2025-10-20T07:20:13Z",
+  "generated_at_epoch": 1697786413,
+  "item_count": 5829,
+  "items": [ ... ]
+}
+```
+前端會以 `generated_at_*` 作為“數據最後更新”時間。
