@@ -175,15 +175,18 @@ function applyFilters() {
   const channelValue = elements.channelFilter.value;
   const startValue = elements.dateStart ? elements.dateStart.value : '';
   const endValue = elements.dateEnd ? elements.dateEnd.value : '';
-  const startMs = startValue ? new Date(`${startValue}T00:00:00`).getTime() : null;
-  const endMs = endValue ? new Date(`${endValue}T23:59:59.999`).getTime() : null;
+  let startMs = startValue ? new Date(startValue).getTime() : null;
+  let endMs = endValue ? new Date(endValue).getTime() : null;
+  if (Number.isNaN(startMs)) startMs = null;
+  if (Number.isNaN(endMs)) endMs = null;
+  if (endMs !== null) endMs += 999;
 
   const filtered = state.allItems.filter((item) => {
     if (typeValue !== 'all' && item.type !== typeValue) return false;
     if (langValue !== 'all' && item.lang !== langValue) return false;
     if (channelValue !== 'all' && item.channel_name !== channelValue) return false;
-    if (startMs && item.createdAtMs && item.createdAtMs < startMs) return false;
-    if (endMs && item.createdAtMs && item.createdAtMs > endMs) return false;
+    if (startMs !== null && item.createdAtMs && item.createdAtMs < startMs) return false;
+    if (endMs !== null && item.createdAtMs && item.createdAtMs > endMs) return false;
 
     if (searchTerm) {
       const haystack = [
@@ -467,9 +470,13 @@ function updateDateInputs(items) {
   if (!times.length) return;
   const min = new Date(Math.min(...times));
   const max = new Date(Math.max(...times));
-  const formatInputDate = (date) => date.toISOString().slice(0, 10);
-  const minStr = formatInputDate(min);
-  const maxStr = formatInputDate(max);
+  const toLocalInputValue = (date) => {
+    const offset = date.getTimezoneOffset();
+    const local = new Date(date.getTime() - offset * 60000);
+    return local.toISOString().slice(0, 19);
+  };
+  const minStr = toLocalInputValue(min);
+  const maxStr = toLocalInputValue(max);
   elements.dateStart.min = minStr;
   elements.dateStart.max = maxStr;
   elements.dateEnd.min = minStr;
