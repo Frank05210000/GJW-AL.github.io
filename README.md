@@ -59,7 +59,7 @@ python -m http.server 3000
 瀏覽 `http://localhost:3000/` 就能看到搜尋、篩選、抽籤以及跳轉原始貼文的介面。
 
 **線上預覽**
-- GitHub Pages：<https://frank05210000.github.io/GJW-AL.github.io/web/?v=timestamp>（加上 `?v=timestamp` 可確保讀到最新資料）
+- GitHub Pages：<https://{你的Github_Username}.github.io/GJW-AL.github.io/web/?v=timestamp>（加上 `?v=timestamp` 可確保讀到最新資料）
 - 歡迎 Fork 這個專案後依需求調整 hashtag 或 UI，並部署成自己的抽籤聚合頁。
 
 ## 後續規劃
