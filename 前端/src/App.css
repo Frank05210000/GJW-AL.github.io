@@ -1,0 +1,91 @@
+.app-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.app-header {
+  margin-bottom: 2.5rem;
+}
+
+.app-header h1 {
+  margin-bottom: 0.5rem;
+  color: #1a2b4e;
+}
+
+.app-header p {
+  font-size: 1.1rem;
+  color: #5a6a85;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.tool-selection {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.tool-card {
+  flex: 1;
+  min-width: 280px;
+  max-width: 350px;
+  padding: 2rem;
+  border: 1px solid #e0e5ec;
+  border-radius: 12px;
+  background-color: #fdfdff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.tool-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  border-color: #c0c9d6;
+}
+
+.tool-card h2 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
+  color: #2c3e50;
+}
+
+.tool-card p {
+  margin-bottom: 0;
+  color: #7f8c9a;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.tool-placeholder {
+  margin-top: 3rem;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px dashed #d3dce6;
+}
+
+.tool-placeholder h2 {
+  margin-top: 0;
+}
+
+.back-button {
+  margin-top: 1.5rem;
+  background-color: #e9ecef;
+  color: #343a40;
+  border: 1px solid #ced4da;
+}
+
+.back-button:hover {
+  background-color: #dee2e6;
+  border-color: #adb5bd;
+}
+

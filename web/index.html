@@ -6,7 +6,7 @@
   <title>GJW-聚合頁爬蟲抽獎</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body data-default-hashtag="#善念點亮台灣" data-default-post-id="1i21p7qkf7h3UWUuo4UDd5V2F1201c">
   <header class="hero">
     <div class="hero__overlay"></div>
     <div class="hero__content">
@@ -17,6 +17,14 @@
   </header>
 
   <main class="container">
+    <div class="mode-switch" role="group" aria-label="資料型態切換">
+      <button type="button" class="mode-button is-active" data-mode="posts">貼文</button>
+      <button type="button" class="mode-button" data-mode="comments">留言</button>
+    </div>
+    <div class="mode-actions">
+      <button id="refreshButton" type="button">重新抓取目前資料</button>
+      <span id="refreshStatus" class="refresh-status"></span>
+    </div>
     <section class="controls" aria-label="篩選工具">
       <div class="control">
         <label for="search">關鍵字搜尋</label>
@@ -41,12 +49,18 @@
         </select>
       </div>
       <div class="control">
-        <label for="dateStart">開始時間</label>
-        <input id="dateStart" type="datetime-local" step="1" autocomplete="off">
+        <label for="dateStartDate">開始時間</label>
+        <div class="datetime-group">
+          <input id="dateStartDate" type="date" autocomplete="off">
+          <input id="dateStartTime" type="time" step="1" autocomplete="off" value="00:00:00" value="00:00:00">
+        </div>
       </div>
       <div class="control">
-        <label for="dateEnd">結束時間</label>
-        <input id="dateEnd" type="datetime-local" step="1" autocomplete="off">
+        <label for="dateEndDate">結束時間</label>
+        <div class="datetime-group">
+          <input id="dateEndDate" type="date" autocomplete="off">
+          <input id="dateEndTime" type="time" step="1" autocomplete="off" value="23:59:59" value="23:59:59">
+        </div>
       </div>
       <div class="control">
         <label for="sortSelect">排序方式</label>
